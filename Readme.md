@@ -44,7 +44,7 @@ TreeRouter<MethodRouter<Variables>> Example:
     router.insert(Get, "/about", about_yoshi);
 
     router.insert(Get, "/*", show_error); // i.e. unknown path / extension...
-~~~rust
+~~~
 
 Ideally the API will function as any RESTful API should. A client will make
   method call for a particular path or 'Variable', and receive an HTTP response
