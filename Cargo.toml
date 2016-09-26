@@ -1,0 +1,8 @@
+[package]
+name = "tin_can_telephone"
+version = "0.1.0"
+authors = ["kibbles <colindjk@gmail.com>"]
+
+[dependencies]
+rustful = "0.9"
+log = "*"
