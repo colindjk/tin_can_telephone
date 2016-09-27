@@ -1,12 +1,13 @@
 #[macro_use]
 extern crate rustful;
 
-use std::error::Error;
+//use std::error::Error;
 
-use rustful::{ Server, Context, Response, TreeRouter };
+//use rustful::{ Server, Context, Response, TreeRouter };
 
 mod example;
+//mod 
 
 fn main() {
-    println!("Hello, world!");
+    example::smash_bros_server().run().ok();
 }

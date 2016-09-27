@@ -1,10 +1,14 @@
 // Examples for understanding concepts will be located here.
 
-use std::error::Error;
+//use std::error::Error;
 
 use rustful::{ Server, Handler, Context, Response, TreeRouter };
+use rustful::router::{ MethodRouter, Variables };
 
-struct Salutation(&'static str);
+pub type MyServer<R> = Server<TreeRouter<MethodRouter<Variables<R>>>>;
+
+#[derive(Default)]
+pub struct Salutation(&'static str);
 
 impl Handler for Salutation {
     /// Remember, 'variables' as in path / route variables.
@@ -19,14 +23,14 @@ impl Handler for Salutation {
 }
 
 /// A server running a router interface example.
-fn smash_bros_server() -> Server {
+pub fn smash_bros_server() -> MyServer<Salutation> {
     let router = insert_routes! { 
         TreeRouter::new() => {
             // Lets define some GET requests!
             "select" => {
                 Get: Salutation("Choose a character!"),
                 ":character" => Get: Salutation("You picked:")
-            }
+            },
             "result" => {
                 Get: Salutation("GAME!"),
                 ":character" => Get: Salutation("The winner is,")
@@ -36,7 +40,7 @@ fn smash_bros_server() -> Server {
 
     Server {
         // Give the server a closure to use for "handling" events.
-        handlers: my_router,
+        handlers: router,
         host: 6767.into(),
 
         // Okay we don't care about any of Servers other fields
