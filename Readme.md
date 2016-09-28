@@ -1,5 +1,5 @@
-tin_can_telephone
-=================
+tct: tin_can_telephone
+======================
 a stateless back-end web service with the purpose of
                      connecting multiple clients' users via either TCP or HTTP
                      connections, ideally running asynchronously.

@@ -1,4 +1,4 @@
-// Examples for understanding concepts will be located here.
+// Rustful examples for understanding concepts will be located here.
 
 use std::error::Error;
 
@@ -26,7 +26,7 @@ fn smash_bros_server() -> Server {
             "select" => {
                 Get: Salutation("Choose a character!"),
                 ":character" => Get: Salutation("You picked:")
-            }
+            },
             "result" => {
                 Get: Salutation("GAME!"),
                 ":character" => Get: Salutation("The winner is,")
@@ -36,7 +36,7 @@ fn smash_bros_server() -> Server {
 
     Server {
         // Give the server a closure to use for "handling" events.
-        handlers: my_router,
+        handlers: router,
         host: 6767.into(),
 
         // Okay we don't care about any of Servers other fields
