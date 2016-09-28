@@ -10,21 +10,26 @@ fn handle_client(mut stream: TcpStream) {
     let mut buf;
     loop {
         // clear out the buffer so we don't send garbage
-        buf = [0; 512];
+        buf = [0; 4096];
         let _ = match stream.read(&mut buf) {
             Err(e) => panic!("Got an error: {}", e),
             Ok(m) => {
                 if m == 0 {
                     // we've got an EOF
+                    println!("Finished reading from client.");
                     break;
                 }
+                println!("Read a buffer.");
                 m
             },
         };
 
         match stream.write(&buf) {
             Err(_) => break,
-            Ok(_) => continue,
+            Ok(_) => {
+
+                continue
+            }, // this is where a history would go.
         }
     }
 }
@@ -37,7 +42,7 @@ pub fn run_echo() {
             Ok(stream) => {
                 println!("Startin' a connect!");
                 thread::spawn(move || {
-                    handle_client(stream)
+                    handle_client(stream);
                 });
             }
         }

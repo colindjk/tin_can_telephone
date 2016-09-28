@@ -5,9 +5,9 @@ extern crate rustful;
 
 //use rustful::{ Server, Context, Response, TreeRouter };
 
-mod example;
-//mod 
+//mod example;
+mod tcp_example;
 
 fn main() {
-    example::smash_bros_server().run().ok();
+    tcp_example::run_echo();
 }
