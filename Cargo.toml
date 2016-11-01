@@ -6,3 +6,6 @@ authors = ["kibbles <colindjk@gmail.com>"]
 [dependencies]
 rustful = "0.9"
 log = "*"
+mio = "*"
+serde = "*"
+serde_macros = "*"
