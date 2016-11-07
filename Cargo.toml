@@ -7,5 +7,5 @@ authors = ["kibbles <colindjk@gmail.com>"]
 rustful = "0.9"
 log = "*"
 mio = "*"
-serde = "*"
-serde_macros = "*"
+rustc-serialize = "0.3.*"
+bufstream = "0.1.*"

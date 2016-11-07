@@ -5,15 +5,53 @@ use rustc_serialize::json::{ Json, ToJson };
 type UserID = u64;
 type UserList = HashMap<UserID, User>;
 
+struct Serializer {
+
+}
+
+impl Serializer {
+    fn hello_world(&self) {
+        println!("Hello world");
+    }
+}
+
+enum Data<K, V, E> {
+    User(Box<T>),
+    Group,
+    Message
+}
+
+enum Option<T> {
+    Some(Box<T>),
+    None
+}
+
+// T == Box<User>
+// 1234
+// 0000
+
 // Groups are formed whenever there is text communication between users, each
 // chat window will have a group JSON object given to it to populate the
 // window / portlet.
+
+//  "User" : {
+//      "first_name" : "Colin"
+//      "last_name" : "Kirkpatrick"
+//      "id" : "117"
+//      "groups" :
+//      ["Group" {
+//          users: ...
+//      },
+//      
+//      ]
+//  }
 
 #[derive(RustcDecodable, RustcEncodable)]
 struct User {
     first_name: String,
     last_name: String,
     id: UserID,
+    group: Group,
 }
 
 /// Group 'users' field holds the JSON objects for users, everything else will
@@ -22,6 +60,14 @@ struct User {
 struct Group {
     users: Vec<User>,
     admins: Vec<UserID>,
+    chat_history: Vec<String>,
+}
+
+/// Immutable pieces of data which represent a message send to and from someone.
+#[derive(RustcDecodable, RustcEncodable)]
+struct Message {
+    user: UserID,
+    msg: str,
     chat_history: Vec<String>,
 }
 
