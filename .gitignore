@@ -2,3 +2,5 @@ target
 rusty-tags*
 tags
 types_*
+*.swp
+Cargo.lock

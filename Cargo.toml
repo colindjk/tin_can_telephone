@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["kibbles <colindjk@gmail.com>"]
 
 [dependencies]
-rustful = "0.9"
 log = "*"
-mio = "*"
+mio = "0.5.*"
 rustc-serialize = "0.3.*"
-bufstream = "0.1.*"
