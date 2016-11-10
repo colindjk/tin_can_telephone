@@ -1,65 +1,67 @@
-extern crate mio;
+extern crate env_logger;
+extern crate futures;
+extern crate tokio_core;
 
-//use mio::deprecated::*;
-//use mio::{Token, EventSet};
-//use mio::{IoDesc, IoHandle, ReadHint, Interest, PollOpt};
-use mio::*;
-use mio::tcp::{TcpListener, TcpStream};
+// TCP or UDP?
+// Can we get non-persistent TCP connections which don't have buffer stalls?
+// Or should we work on UDP to make sure we have control over whether or not
+// messages are sent / received?
 
-const SERVER : Token = Token(0);
-const CLIENT : Token = Token(1);
+// Note on the copy(reader, writer) function, it's very simple.
+// The function takes data given to reader and copies it over to writer, writing back
+// whatever was written. The 'copy' might as well be called 'echo'.
 
-struct MyHandler(TcpListener);
+// Also, in this case, when an incoming socket happens, we cannot handle the split
+// without a future, since the connection will persist far longer than the 'for_each'
+// iteration will, therefore it must be run asynchronously, to avoid only being able
+// to handle one client at a time.
 
-impl Handler for MyHandler {
-    type Timeout = ();
-    type Message = ();
+use std::net::SocketAddr;
 
-    fn ready(&mut self,
-             event_loop: &mut EventLoop<MyHandler>,
-             token: Token,
-             _: EventSet)
-    {
-        match token {
-            SERVER => {
-                let MyHandler(ref mut server) = *self;
-                // Accept and drop?
-                let _ = server.accept();
-            }
-            CLIENT => {
-                event_loop.shutdown();
-            }
-            _ => panic!("Something bad happened.")
-        }
-    }
-}
+use futures::Future;
+use futures::stream::Stream;
+use tokio_core::io::{copy, Io};
+use tokio_core::net::TcpListener;
+use tokio_core::reactor::Core;
 
 fn main() {
+    let addr = "127.0.0.1:8080".to_string().parse::<SocketAddr>().unwrap();
 
-    let addr = "127.0.0.1:8888".parse().unwrap();
+    let mut core_loop = Core::new().unwrap();
+    let handle = core_loop.handle();
 
-    // Setup the server socket
-    let server = TcpListener::bind(&addr).unwrap();
+    // initiate a tcp listener (server's role)
+    let socket = TcpListener::bind(&addr, &handle).unwrap();
 
-    // Create an event loop
-    let mut event_loop = EventLoop::new().unwrap();
+    println!("I'm listening on {}", addr);
 
-    // Start listening for incoming connections
-    event_loop.register(
-        &server /* TcpListener */,
-        SERVER  /* Token */,
-        EventSet::readable(),
-        PollOpt::edge()
-    ).unwrap();
+    let done = socket.incoming().for_each(move |(socket, addr)| {
 
-    // Setup the client socket
-    let sock = TcpStream::connect(&addr).unwrap();
+        // Copy's all bytes from 'reader' (from the client), to 'writer' (to the client).
+        //let io_pair = futures::lazy(|| Ok(socket.split()));
+        //let amt = io_pair.and_then(|(reader, writer)| { copy(reader, writer) });
 
-    // Register the socket
-    event_loop.register(&sock, CLIENT, EventSet::readable(),
-                        PollOpt::edge()).unwrap();
+        println!("I'm talking on {}", addr);
 
+        //let msg = amt.map(move |amt| {
+            //println!("Wrote {} bytes to {}", amt, addr);
+        //}).map_err(|e| {
+            //panic!("Error: {}", e);
+        //});
 
-    event_loop.run(&mut MyHandler(server)).unwrap();
+        let msg = futures::lazy(|| Ok(socket.split()))
+            .and_then(|(r, w)| copy(r, w))
+            .map(move |amt| {
+                println!("Wrote {} bytes to {}", amt, addr);
+            }).map_err(|e| {
+            panic!("Error: {}", e);
+        });
 
+        handle.spawn(msg);
+
+        Ok(())
+    });
+
+    core_loop.run(done).unwrap();
 }
+

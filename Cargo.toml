@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["kibbles <colindjk@gmail.com>"]
 
 [dependencies]
-log = "*"
-mio = "0.5.*"
+futures = "0.1"
+mio = "0.6"
+log = "0.3"
 rustc-serialize = "0.3.*"
+tokio-core = "0.1"
+env_logger = "0.3"
