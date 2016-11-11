@@ -1,6 +1,15 @@
+//#![cfg_attr(feature = "serde_derive", feature(proc_macro))]
+
+//#[cfg(feature = "serde_derive")]
+//#[macro_use]
+//extern crate serde_derive;
+
 extern crate env_logger;
 extern crate futures;
 extern crate tokio_core;
+//extern crate serde;
+//extern crate serde_json;
+
 
 // TCP or UDP?
 // Can we get non-persistent TCP connections which don't have buffer stalls?
@@ -17,51 +26,62 @@ extern crate tokio_core;
 // to handle one client at a time.
 
 use std::net::SocketAddr;
+use std::io::{Write, Read};
+use std::str::{from_utf8};
 
 use futures::Future;
 use futures::stream::Stream;
+
 use tokio_core::io::{copy, Io};
-use tokio_core::net::TcpListener;
+use tokio_core::net::{TcpListener, TcpStream};
 use tokio_core::reactor::Core;
 
+//use serde_json::*;
+
+//mod server;
+//mod client;
+mod data;
+
+use data::Data;
+
+struct Writer;
+
+impl Write for Writer {
+    fn write(&mut self, buf : &[u8]) -> Result<usize, std::io::Error> {
+        //println!("Recieved : {}", from_utf8(buf).unwrap().to_string());
+        //let msg = from_utf8(buf).unwrap().to_string();
+        //let val : Data = serde_json::from_slice(&buf);
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> Result<(), std::io::Error> {
+        Ok(())
+    }
+}
+
+// We're gonna read some JSON
 fn main() {
     let addr = "127.0.0.1:8080".to_string().parse::<SocketAddr>().unwrap();
-
-    let mut core_loop = Core::new().unwrap();
-    let handle = core_loop.handle();
-
-    // initiate a tcp listener (server's role)
+    let mut core = Core::new().unwrap();
+    let handle = core.handle();
     let socket = TcpListener::bind(&addr, &handle).unwrap();
 
-    println!("I'm listening on {}", addr);
-
-    let done = socket.incoming().for_each(move |(socket, addr)| {
-
-        // Copy's all bytes from 'reader' (from the client), to 'writer' (to the client).
-        //let io_pair = futures::lazy(|| Ok(socket.split()));
-        //let amt = io_pair.and_then(|(reader, writer)| { copy(reader, writer) });
-
-        println!("I'm talking on {}", addr);
-
-        //let msg = amt.map(move |amt| {
-            //println!("Wrote {} bytes to {}", amt, addr);
-        //}).map_err(|e| {
-            //panic!("Error: {}", e);
-        //});
-
-        let msg = futures::lazy(|| Ok(socket.split()))
-            .and_then(|(r, w)| copy(r, w))
-            .map(move |amt| {
-                println!("Wrote {} bytes to {}", amt, addr);
+    let core_loop = socket.incoming().for_each(|(stream, addr)| {
+        let message =
+            futures::lazy(move || {
+                Ok(stream.split())
+            }).and_then(|(r, _w)| {
+                copy(r, Writer)
+            }).map(move |amt| {
+                println!("Said hello to client {} at {}!", amt, addr);
             }).map_err(|e| {
-            panic!("Error: {}", e);
-        });
+                panic!("Error: {}", e);
+            });
 
-        handle.spawn(msg);
+        handle.spawn(message);
 
         Ok(())
     });
 
-    core_loop.run(done).unwrap();
+    core.run(core_loop).unwrap();
 }
 
