@@ -48,7 +48,7 @@ struct Writer;
 
 impl Write for Writer {
     fn write(&mut self, buf : &[u8]) -> Result<usize, std::io::Error> {
-        //println!("Recieved : {}", from_utf8(buf).unwrap().to_string());
+        print!("Recieved : {}", from_utf8(buf).unwrap().to_string());
         //let msg = from_utf8(buf).unwrap().to_string();
         //let val : Data = serde_json::from_slice(&buf);
         Ok(buf.len())
