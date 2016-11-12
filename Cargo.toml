@@ -10,6 +10,7 @@ log = "0.3"
 
 serde = "0.8.*"
 serde_derive = "0.8.*"
+serde_xml = "0.8.*"
 serde_json = "0.8.*"
 
 tokio-core = "0.1"

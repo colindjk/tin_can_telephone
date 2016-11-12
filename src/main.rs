@@ -41,6 +41,7 @@ use tokio_core::reactor::Core;
 //mod server;
 //mod client;
 mod data;
+mod xmpp;
 
 use data::Data;
 
