@@ -4,14 +4,24 @@
 type UserID = u64;
 //type UserMap = HashMap<UserID, Data::User>;
 
-pub enum Data {
-    User {
-        name: String
-    },
-    Group {
-        id: u64
-    },
-    Message {
-        text: String
-    }
+#[deriving(Debug, Serialize, Deserialize)]
+pub struct Message {
+    user_id: UserID,
+    message_body: String,
+    flags: u64,
 }
+
+#[deriving(Debug, Serialize, Deserialize)]
+pub struct InfoRequest {
+
+}
+
+#[deriving(Debug, Serialize, Deserialize)]
+pub struct User {
+    user_id: UserID, // will be an username / email address.
+}
+
+enum Info {
+
+}
+
