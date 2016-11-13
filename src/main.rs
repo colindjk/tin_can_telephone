@@ -1,5 +1,5 @@
 #![feature(proc_macro, plugin, custom_attribute, custom_derive, plugin, test)]
-#![plugin(serde_macros)]
+#![plugin(serde_derive)]
 
 // Imports:
 
@@ -21,18 +21,16 @@ extern crate tokio_core;
 // TODO: mod server, client? -> Implement logging ('log') for the XML stream.
 
 // TCP or UDP?
-// Can we get non-persistent TCP connections which don't have buffer stalls?
-// Or should we work on UDP to make sure we have control over whether or not
-// messages are sent / received?
+// TCP.
 
 // Note on the copy(reader, writer) function, it's very simple.
-// The function takes data given to reader and copies it over to writer, writing back
-// whatever was written. The 'copy' might as well be called 'echo'.
+// The function takes data given to reader and copies it over to writer,
+// writing back whatever was written. The 'copy' might as well be called 'echo'.
 
 // Also, in this case, when an incoming socket happens, we cannot handle the split
-// without a future, since the connection will persist far longer than the 'for_each'
-// iteration will, therefore it must be run asynchronously, to avoid only being able
-// to handle one client at a time.
+// without a future, since the connection will persist far longer than the
+// 'for_each' iteration will, therefore it must be run asynchronously, to avoid
+// only being able to handle one client at a time.
 
 use std::net::SocketAddr;
 use std::io::{Write, Read};
@@ -48,11 +46,11 @@ use tokio_core::reactor::Core;
 //use serde_json::*;
 
 mod server;
-//mod client;
+mod client;
 mod data;
 mod xmpp;
 
-use server::Writer;
+use server::TctServer;
 
 // We're gonna read some JSON
 fn main() {
@@ -65,8 +63,9 @@ fn main() {
         let message =
             futures::lazy(move || {
                 Ok(stream.split())
-            }).and_then(move |(r, _w)| {
-                copy(r, Writer{ addr: addr.clone() }) // 'Connect' the streams.
+            }).and_then(move |(r, w)| {
+                //copy(r, Writer{ addr: addr.clone() }) // 'Connect' the streams.
+                copy(r, w) // 'Connect' the streams.
             }).map(move |amt| {
                 println!("Said hello to client {} at {}!", amt, addr);
             }).map_err(|e| {

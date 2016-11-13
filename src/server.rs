@@ -1,51 +1,69 @@
 // Example TCP
+extern crate futures; // There is no reason why this should need to be here... 
 
 use std::net::SocketAddr;
-use std::io::{Write, Read};
+use std::io::{Error, Write, Read};
 use std::str::{from_utf8};
+use std::collections::{HashMap};
+use std::rc::Rc;
+use std::cell::RefCell;
 
-use tokio_core::net::TcpListener;
-use tokio_core::reactor::Core;
+use futures::{Future};
+use futures::stream::Stream;
 
-type Username = String;
+use tokio_core::io::{copy, Io};
+use tokio_core::net::{TcpListener, TcpStream};
+use tokio_core::reactor::{Core, Handle};
+
+use client::TctClient;
+
+type UserID = u16; // right now we'll just id by port number for ease
 
 struct User {
     live_address: Vec<SocketAddr>,
 
 }
 
-struct TctServer {
-    socket: TcpListener,
-    online: HashMap<Username, User>
-}
-
-/// Current implementation of our message interpreter, ideally will be the
-/// XMPP stream.
-/// Remember, there is one connection per client. Regular XMPP chat's would
-/// allow for multiple simultaneous connections to the same stream, not sure
-/// if we want to do that.
-struct ClientStream {
-    stream: TcpStream,
+pub struct TctServer {
+    clients: Rc<RefCell<HashMap<UserID, TctClient>>>,
+    core: Core,
     addr: SocketAddr,
 }
 
-impl Write for Writer {
-    fn write(&mut self, buf : &[u8]) -> Result<usize, std::io::Error> {
-        print!("{} : {}", self.addr.port(), from_utf8(buf).unwrap().to_string());
-        //let msg = from_utf8(buf).unwrap().to_string();
-        //let val : Data = serde_json::from_slice(&buf);
-        Ok(buf.len())
+impl TctServer {
+
+    pub fn new(addr: SocketAddr) -> TctServer {
+        TctServer {
+            core: Core::new().unwrap(),
+            addr: addr,
+            clients: Rc::new(RefCell::new(HashMap::new()))
+        }
     }
-    fn flush(&mut self) -> Result<(), std::io::Error> {
-        Ok(())
+
+    fn run(&mut self) {
+        let socket =
+            TcpListener::bind(&self.addr, &self.core.handle().clone()).unwrap();
+        socket.incoming().for_each(move |(stream, addr)| {
+            self.clients.borrow_mut()
+                .insert(addr.port(), TctClient::new(stream, addr));
+            //let do_thing =
+                //futures::lazy(move || {
+                    //self.clients.insert(
+                        //addr.port(),
+                        //TctClient::new(stream, addr)
+                    //);
+                //}).and_then(move |(r, w)| {
+                    //// copy(r, Writer{ addr: addr.clone() })
+                    //// 'Connect' the streams.
+                    //copy(r, w) // 'Connect' the streams.
+                //}).map(move |amt| {
+                    //println!("Said hello to client {} at {}!", amt, addr);
+                //}).map_err(|e| {
+                    //panic!("Error: {}", e);
+                //});
+            //self.handle.clone().spawn(do_thing);
+            Ok(())
+        });
     }
 }
-
-/// Central state of the program, managing connections etc.
-pub struct Server {
-    socket: TcpListener,
-    //connections: HashMap<Token, Client>,
-    //users: HashMap<Token, Client>, // for now we'll just have a hashmap of online users.
-}
-
 

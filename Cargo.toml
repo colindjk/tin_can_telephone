@@ -4,15 +4,11 @@ version = "0.1.0"
 authors = ["kibbles <colindjk@gmail.com>"]
 
 [dependencies]
-futures = "0.1"
-mio = "0.6"
-log = "0.3"
-
 serde = "0.8.*"
-serde_macros = "0.8.*"
-serde_derive = "0.8.*"
 serde_xml = "0.8.*"
-serde_json = "0.8.*"
+serde_derive = "0.8.*"
 
+futures = "0.1"
 tokio-core = "0.1"
+
 env_logger = "0.3"
