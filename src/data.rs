@@ -4,6 +4,34 @@
 type UserID = u64;
 //type UserMap = HashMap<UserID, Data::User>;
 
+use tokio_core::io::*;
+use std::io::{Error};
+//use tokio_core::io::frame::*;
+
+#[deriving(sized)]
+pub enum Data {
+    Message,
+    Problem,
+    Etc,
+}
+
+/// Decodability, this is where we decide on formatting.
+impl Decode for Data {
+    fn decode(buf: &mut EasyBuf) -> Result<Option<Self>, Error> {
+        panic!("unimplemented");
+    }
+    fn done(buf: &mut EasyBuf) -> Result<Self, Error> {
+        panic!("unimplemented");
+    }
+}
+
+/// Encodability
+impl Encode for Data {
+    fn encode(self, buf: &mut Vec<u8>) {
+        panic!("unimplemented");
+    }
+}
+
 #[deriving(Debug, Serialize, Deserialize)]
 pub struct Message {
     user_id: UserID,

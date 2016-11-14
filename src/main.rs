@@ -33,6 +33,7 @@ extern crate tokio_core;
 // 'for_each' iteration will, therefore it must be run asynchronously, to avoid
 // only being able to handle one client at a time.
 
+#[warn(unused_features, unused_imports)]
 use std::net::SocketAddr;
 use std::io::{Write, Read};
 use std::str::{from_utf8};
@@ -40,7 +41,7 @@ use std::str::{from_utf8};
 use futures::Future;
 use futures::stream::Stream;
 
-use tokio_core::io::{copy, Io};
+use tokio_core::io::{copy, Io, Encode, Decode};
 use tokio_core::net::{TcpListener, TcpStream};
 use tokio_core::reactor::Core;
 
@@ -49,12 +50,12 @@ use tokio_core::reactor::Core;
 mod server;
 mod client;
 mod data;
-mod xmpp;
+//mod xmpp;
 
-use server::TctServer;
+//use server::TctServer;
 
 /// -- Global Constants --
-static DELIMITER : u8 = '\n' as u8;
+static DELIMITER : u8 = b'\n' as u8;
 
 // We're gonna read some JSON
 fn main() {

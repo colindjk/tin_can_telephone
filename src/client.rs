@@ -9,7 +9,13 @@ use futures::stream::Stream;
 
 use tokio_core::net::{TcpStream};
 use tokio_core::reactor::{Core, Handle};
+use tokio_core::io::{ // Organized the imports to give a visual rep
+    Io,
+    ReadHalf, 
+    WriteHalf,
+};
 
+use data::*;
 
 /// Current implementation of our message interpreter, ideally will be the
 /// XMPP stream.
@@ -30,21 +36,23 @@ impl TctClient {
     }
 }
 
+/// Trait to be used by the server to consume and use the reading / writing of
+/// this client via sendable objects (data.rs?).
+impl Io for TctClient {
+
+}
+
 impl Write for TctClient {
     fn write(&mut self, buf : &[u8]) -> Result<usize, Error> {
-        print!("Client : {}", from_utf8(buf).unwrap().to_string());
-        //let msg = from_utf8(buf).unwrap().to_string();
-        //let val : Data = serde_json::from_slice(&buf);
-        Ok(buf.len())
+        self.stream.write(buf)
     }
     fn flush(&mut self) -> Result<(), Error> {
-        Ok(())
+        self.stream.flush()
     }
 }
 
 impl Read for TctClient {
     fn read(&mut self, buf : &mut [u8]) -> Result<usize, Error> {
-        self.stream.read(buf);
-        Ok(buf.len())
+        self.stream.read(buf)
     }
 }
