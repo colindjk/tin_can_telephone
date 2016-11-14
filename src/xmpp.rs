@@ -36,8 +36,6 @@ impl<S> XmlStream<S> where S : Read + Write {
     }
 }
 
-//impl<S> Read
-
 impl<S> Stream for XmlStream<S> where S : Read + Write {
     type Item = String;
     type Error = String;

@@ -16,8 +16,9 @@ extern crate env_logger;
 extern crate futures;
 extern crate tokio_core;
 
-
-// TODO: mod xmpp -> Implement XmlStream struct.
+// TODO: mod server -> Client management, send / receive messages to clients
+// TODO: mod client -> reads data given by a client, who writes back? (format? -> next)
+// TODO: mod xmpp -> formatting -> implement XmlStream struct.
 // TODO: mod server, client? -> Implement logging ('log') for the XML stream.
 
 // TCP or UDP?
@@ -51,6 +52,9 @@ mod data;
 mod xmpp;
 
 use server::TctServer;
+
+/// -- Global Constants --
+static DELIMITER : u8 = '\n' as u8;
 
 // We're gonna read some JSON
 fn main() {

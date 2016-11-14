@@ -1,4 +1,4 @@
-
+// TODO: How to send / receive the things. And format.
 use std::net::SocketAddr;
 use std::io::{Error, Write, Read};
 use std::str::{from_utf8};
@@ -39,5 +39,12 @@ impl Write for TctClient {
     }
     fn flush(&mut self) -> Result<(), Error> {
         Ok(())
+    }
+}
+
+impl Read for TctClient {
+    fn read(&mut self, buf : &mut [u8]) -> Result<usize, Error> {
+        self.stream.read(buf);
+        Ok(buf.len())
     }
 }
