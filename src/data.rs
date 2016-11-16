@@ -1,18 +1,32 @@
 // This file will include the Data (struct or enum) which will represent the
-// different pieces of data which can be passed via HTTP style Request / Response.
+// different pieces of data which can be passed via HTTP style Request / Response
+pub type UserID = SocketAddr; // right now we'll just id by port number for ease
 
-type UserID = u64;
-//type UserMap = HashMap<UserID, Data::User>;
-
-use tokio_core::io::*;
+use std::net::SocketAddr;
+use tokio_core::io::{Io, Decode, Encode, EasyBuf};
 use std::io::{Error};
 //use tokio_core::io::frame::*;
 
 #[deriving(sized)]
+/// The IMMUTABLE struct which is passed between threads etc in order
+/// to send and receive messages.
 pub enum Data {
-    Message,
-    Problem,
-    Etc,
+    Message(UserID, String),    // Regular old message to UserID
+    Request(UserID),            // friend request to user
+    GroupRequest(UserID),       // Group invite request
+    Error(String),              // Some sort of error?
+}
+
+impl Data {
+    /// Optionally returns the ID the message should be sent to.
+    pub fn id(&self) -> Option<UserID> {
+        match *self {
+            Data::Message(id, _)    => Some(id.clone()),
+            Data::Request(id)       => Some(id.clone()),
+            Data::GroupRequest(id)  => Some(id.clone()),
+            Data::Error(_)          => None,
+        }
+    }
 }
 
 /// Decodability, this is where we decide on formatting.
@@ -32,24 +46,24 @@ impl Encode for Data {
     }
 }
 
-#[deriving(Debug, Serialize, Deserialize)]
-pub struct Message {
-    user_id: UserID,
-    message_body: String,
-    flags: u64,
-}
+//#[deriving(Debug, Serialize, Deserialize)]
+//pub struct Message {
+    //user_id: UserID,
+    //message_body: String,
+    //flags: u64,
+//}
 
-#[deriving(Debug, Serialize, Deserialize)]
-pub struct InfoRequest {
+//#[deriving(Debug, Serialize, Deserialize)]
+//pub struct InfoRequest {
 
-}
+//}
 
-#[deriving(Debug, Serialize, Deserialize)]
-pub struct User {
-    user_id: UserID, // will be an username / email address.
-}
+//#[deriving(Debug, Serialize, Deserialize)]
+//pub struct User {
+    //user_id: UserID, // will be an username / email address.
+//}
 
-enum Info {
+//enum Info {
 
-}
+//}
 

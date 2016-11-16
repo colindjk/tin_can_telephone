@@ -16,6 +16,7 @@ extern crate env_logger;
 extern crate futures;
 extern crate tokio_core;
 
+// TODO: NEXT -> SERIALIZATION ULTIMATUM.
 // TODO: mod server -> Client management, send / receive messages to clients
 // TODO: mod client -> reads data given by a client, who writes back? (format? -> next)
 // TODO: mod xmpp -> formatting -> implement XmlStream struct.
