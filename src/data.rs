@@ -7,6 +7,8 @@ use tokio_core::io::{Io, Codec, EasyBuf};
 use std::io::{Error};
 //use tokio_core::io::frame::*;
 
+pub type Message = Result<Data, String>;
+
 #[deriving(sized)]
 #[derive(Clone)]
 /// The IMMUTABLE struct which is passed between threads etc in order

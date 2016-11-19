@@ -65,7 +65,7 @@ impl TctServer {
         // For each incoming client connection at address 'addr'
         socket.incoming().for_each(|(stream, addr)| {
 
-            let server_sender = self.channel.0.clone();
+            let mut server_sender = self.channel.0.clone();
 
             let socket = TctClient::new(stream, addr).framed(DataParser);
             let (sender, receiver) = mpsc::unbounded();
@@ -82,8 +82,8 @@ impl TctServer {
                 // How about just taking a random client for testing?
                 // TODO: Unit test for the 'socket.for_each' functionality.
                 if let Some(id) = msg.id() {
-                    clients.borrow().get(&id)
-                                 .unwrap_or(&server_sender).send(msg); // panic?
+                    clients.borrow_mut().get_mut(&id)
+                                 .unwrap_or(&mut server_sender).send(msg); // panic?
                 } else {
                     panic!("What do for error from client?");
                 }
