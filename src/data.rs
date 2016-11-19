@@ -3,11 +3,12 @@
 pub type UserID = SocketAddr; // right now we'll just id by port number for ease
 
 use std::net::SocketAddr;
-use tokio_core::io::{Io, Decode, Encode, EasyBuf};
+use tokio_core::io::{Io, Codec, EasyBuf};
 use std::io::{Error};
 //use tokio_core::io::frame::*;
 
 #[deriving(sized)]
+#[derive(Clone)]
 /// The IMMUTABLE struct which is passed between threads etc in order
 /// to send and receive messages.
 pub enum Data {
@@ -29,19 +30,25 @@ impl Data {
     }
 }
 
-/// Decodability, this is where we decide on formatting.
-impl Decode for Data {
-    fn decode(buf: &mut EasyBuf) -> Result<Option<Self>, Error> {
-        panic!("unimplemented");
-    }
-    fn done(buf: &mut EasyBuf) -> Result<Self, Error> {
-        panic!("unimplemented");
-    }
-}
+pub struct DataParser;
 
-/// Encodability
-impl Encode for Data {
-    fn encode(self, buf: &mut Vec<u8>) {
+/// Decodability, this is where we decide on formatting.
+impl Codec for DataParser {
+    type In = Data;
+    type Out = Data;
+
+    /// Reads the EasyBuf.
+    fn decode(&mut self, buf: &mut EasyBuf) -> Result<Option<Self::In>, Error> {
+        panic!("unimplemented");
+    }
+
+    /// Fills the buffer with the consumed 'Out' message.
+    fn encode(&mut self, msg: Self::Out, buf: &mut Vec<u8>) {
+        panic!("unimplemented");
+    }
+
+    /// Reads until the end of stream, 
+    fn decode_eof(&mut self, buf: &mut EasyBuf) -> Result<Self::In, Error> {
         panic!("unimplemented");
     }
 }

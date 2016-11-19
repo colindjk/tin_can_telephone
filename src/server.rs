@@ -2,7 +2,6 @@
 // Then try and get clients to talk to everyone -> specific clients.
 // Once that's done, move on to formatting messages via tokio::Encode / Decode.
 // Example TCP
-extern crate futures; // There is no reason why this should need to be here... 
 
 #[allow(unused_imports)]
 use std::net::SocketAddr;
@@ -18,22 +17,23 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::result::Result;
 
-use futures::{Future};
-use futures::stream::Stream;
+use futures::{
+    Future,
+};
+use futures::stream::{Stream};
+use futures::sync::*;
 
 use tokio_core::io::{Io, ReadHalf, WriteHalf};
 use tokio_core::net::{TcpListener, TcpStream};
 use tokio_core::reactor::{Core, Handle};
-use tokio_core::channel::{channel, Sender, Receiver};
+// tokio::channel is deprecated
 
 use client::TctClient;
-use data::{Data, UserID};
-
-//pub struct ClientSocket(TctClient, (Sender<T>, Receiver<T>));
+use data::{Data, DataParser, UserID};
 
 pub struct TctServer {
-    clients: Rc<RefCell<HashMap<UserID, Sender<Data>>>>,
-    channel: (Sender<Data>, Receiver<Data>),
+    clients: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Data>>>>,
+    channel: (mpsc::UnboundedSender<Data>, mpsc::UnboundedReceiver<Data>),
     core: Core,
     addr: SocketAddr,
 }
@@ -48,7 +48,7 @@ impl TctServer {
         TctServer {
             // Odd way of doing this but yeah, core needs to be defined after
             // channel.
-            channel: channel(&core.handle()).unwrap(),
+            channel: mpsc::unbounded(),
             core: core,
             addr: addr,
             clients: Rc::new(RefCell::new(HashMap::new()))
@@ -61,12 +61,14 @@ impl TctServer {
         let socket =
             TcpListener::bind(&self.addr, &self.core.handle().clone()).unwrap();
         let handle = self.core.handle();
-        let server_sender = self.channel.0.clone();
 
+        // For each incoming client connection at address 'addr'
         socket.incoming().for_each(|(stream, addr)| {
-            // Extract read (stream) / write (sink), 'write' to 'sender'.
-            let socket = TctClient::new(stream, addr).framed::<Data, Data>();
-            let (sender, receiver) = channel(&handle).unwrap();
+
+            let server_sender = self.channel.0.clone();
+
+            let socket = TctClient::new(stream, addr).framed(DataParser);
+            let (sender, receiver) = mpsc::unbounded();
 
             self.clients.borrow_mut().insert(addr.clone(), sender);
 
@@ -76,10 +78,12 @@ impl TctServer {
             // Messages get sent to online user, if user not found, sent to 
             // server to be handled (check DB, if no -> send error).
             let socket = socket.for_each(|msg: Data| {
+                let clients = clients_inner.clone();
                 // How about just taking a random client for testing?
                 // TODO: Unit test for the 'socket.for_each' functionality.
                 if let Some(id) = msg.id() {
-                    clients_inner.borrow().get(&id)
+                    let mut clients = clients.borrow_mut();
+                    clients.get(&id)
                                  .unwrap_or(&server_sender).send(msg); // panic?
                 } else {
                     panic!("What do for error from client?");
@@ -87,10 +91,6 @@ impl TctServer {
                 Ok(())
             });
             // TODO what to do?
-
-            //.and_then(|_| { // param is Ok(())
-                //clients_inner.borrow_mut().remove(&addr);
-            //});
 
             Ok(())
         });

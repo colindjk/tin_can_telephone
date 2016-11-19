@@ -42,7 +42,7 @@ use std::str::{from_utf8};
 use futures::Future;
 use futures::stream::Stream;
 
-use tokio_core::io::{copy, Io, Encode, Decode};
+use tokio_core::io::{copy, Io};
 use tokio_core::net::{TcpListener, TcpStream};
 use tokio_core::reactor::Core;
 
