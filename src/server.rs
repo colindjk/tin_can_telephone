@@ -82,8 +82,7 @@ impl TctServer {
                 // How about just taking a random client for testing?
                 // TODO: Unit test for the 'socket.for_each' functionality.
                 if let Some(id) = msg.id() {
-                    let mut clients = clients.borrow_mut();
-                    clients.get(&id)
+                    clients.borrow().get(&id)
                                  .unwrap_or(&server_sender).send(msg); // panic?
                 } else {
                     panic!("What do for error from client?");
