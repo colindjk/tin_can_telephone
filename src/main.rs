@@ -5,7 +5,8 @@
 
 // -- Parsing:
 extern crate serde;
-extern crate serde_xml;
+extern crate serde_xml as xml;
+extern crate serde_json as json;
 #[macro_use] 
 extern crate serde_derive;
 
@@ -36,53 +37,22 @@ extern crate tokio_core;
 
 #[warn(unused_features, unused_imports)]
 use std::net::SocketAddr;
-use std::io::{Write, Read};
-use std::str::{from_utf8};
-
-use futures::Future;
-use futures::stream::Stream;
-
-use tokio_core::io::{copy, Io};
-use tokio_core::net::{TcpListener, TcpStream};
-use tokio_core::reactor::Core;
-
-//use serde_json::*;
 
 mod server;
 mod client;
 mod data;
-//mod xmpp;
 
-//use server::TctServer;
+use server::TctServer;
 
 /// -- Global Constants --
-static DELIMITER : u8 = b'\n' as u8;
+//static DELIMITER : u8 = b'\n' as u8;
 
 // We're gonna read some JSON
 fn main() {
     let addr = "127.0.0.1:8080".to_string().parse::<SocketAddr>().unwrap();
-    let mut core = Core::new().unwrap();
-    let handle = core.handle();
-    let socket = TcpListener::bind(&addr, &handle).unwrap();
 
-    let core_loop = socket.incoming().for_each(|(stream, addr)| {
-        let message =
-            futures::lazy(move || {
-                Ok(stream.split())
-            }).and_then(move |(r, w)| {
-                //copy(r, Writer{ addr: addr.clone() }) // 'Connect' the streams.
-                copy(r, w) // 'Connect' the streams.
-            }).map(move |amt| {
-                println!("Said hello to client {} at {}!", amt, addr);
-            }).map_err(|e| {
-                panic!("Error: {}", e);
-            });
+    let mut server = TctServer::new(addr);
 
-        handle.spawn(message);
-
-        Ok(())
-    });
-
-    core.run(core_loop).unwrap();
+    server.run();
 }
 
