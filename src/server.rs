@@ -5,26 +5,22 @@
 
 #[allow(unused_imports)]
 use std::net::SocketAddr;
-use std::io::{
-    Error,
-    ErrorKind,
-    Write,
-    Read
-};
-use std::str::{from_utf8};
 use std::collections::{HashMap};
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::result::Result;
 
-use futures::{
-    Future,
-};
+use std::io::{Error as IoError, ErrorKind};
+
+use futures::AsyncSink;
+use futures::Future;
 use futures::stream::{Stream};
+use futures::sink::{Sink};
 use futures::sync::*;
 
-use tokio_core::io::{Io, ReadHalf, WriteHalf};
-use tokio_core::net::{TcpListener, TcpStream};
+use tokio_core::io::{Io,
+    FramedWrite
+};
+use tokio_core::net::{TcpListener};
 use tokio_core::reactor::{Core, Handle};
 // tokio::channel is deprecated
 
@@ -61,38 +57,62 @@ impl TctServer {
         let socket =
             TcpListener::bind(&self.addr, &self.core.handle().clone()).unwrap();
         let handle = self.core.handle();
+        let clients = self.clients.clone();
+        let sender = self.channel.0.clone();
+
+        println!("Chat service running at port : {}", self.addr.port());
 
         // For each incoming client connection at address 'addr'
-        socket.incoming().for_each(|(stream, addr)| {
+        let server = socket.incoming().for_each(|(stream, addr)| {
 
-            let mut server_sender = self.channel.0.clone();
+            println!("Connected to client {}", addr);
 
-            let socket = TctClient::new(stream, addr).framed(DataParser);
+            let mut server_sender = sender.clone();
+
+            // reader   -> sender
+            // receiver -> writer
+            let (reader, mut writer) = TctClient::new(stream, addr)
+                .framed(DataParser).split();
             let (sender, receiver) = mpsc::unbounded();
 
-            self.clients.borrow_mut().insert(addr.clone(), sender);
+            clients.borrow_mut().insert(addr.port(), sender);
 
-            let clients_inner = self.clients.clone();
+            let clients_inner = clients.clone();
 
-            // Now this is a bit funky, but it's really just piping.
-            // Messages get sent to online user, if user not found, sent to 
-            // server to be handled (check DB, if no -> send error).
-            let socket = socket.for_each(|msg: Data| {
-                let clients = clients_inner.clone();
-                // How about just taking a random client for testing?
-                // TODO: Unit test for the 'socket.for_each' functionality.
+            // Every message received over the stream, from client
+            let reader = reader.for_each(move |msg: Data| {
+                println!("Reading message {}", msg.id().unwrap());
+                // let clients = clients_inner.clone()?
                 if let Some(id) = msg.id() {
-                    clients.borrow_mut().get_mut(&id)
-                                 .unwrap_or(&mut server_sender).send(msg); // panic?
+                    println!("Sending message {}", msg.id().unwrap());
+                    clients_inner.borrow_mut().get_mut(&id)
+                        .unwrap_or(&mut server_sender)
+                        .send(msg)
+                        .or_else(
+                            |err| Err(IoError::new(ErrorKind::Other, err)));
+                    Ok(())
                 } else {
-                    panic!("What do for error from client?");
+                    panic!("Client reported error")
                 }
-                Ok(())
+            }).map_err(|_| ());
+
+            let receiver = receiver.for_each(move |mut msg| {
+                println!("Writing message");
+                match writer.start_send(msg) { // handle it like 'send'
+                    Ok(AsyncSink::Ready) => Ok(()),
+                    Ok(AsyncSink::NotReady(balls)) => panic!("failed to send"),
+                    Err(err) => Err(())
+                }
             });
-            // TODO what to do?
+
+            //let clients = self.clients.clone();
+            //let connection = receiver.map(|_| ()).select(reader.map(|_| ()));
+            handle.spawn(receiver);
+            handle.spawn(reader);
 
             Ok(())
         });
+        self.core.run(server).unwrap();
     }
 }
 
