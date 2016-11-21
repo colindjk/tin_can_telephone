@@ -4,15 +4,14 @@ use std::io::{Error, Write, Read};
 use std::str::{from_utf8};
 use std::collections::{HashMap};
 
-use futures::{Future};
+//use futures::{Future};
 use futures::stream::Stream;
 
 use tokio_core::net::{TcpStream};
 use tokio_core::reactor::{Core, Handle};
 use tokio_core::io::{ // Organized the imports to give a visual rep
     Io,
-    ReadHalf, 
-    WriteHalf,
+    ReadHalf, WriteHalf,
 };
 
 use data::*;
