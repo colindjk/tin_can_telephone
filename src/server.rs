@@ -18,7 +18,6 @@ use futures::sink::{Sink};
 use futures::sync::*;
 
 use tokio_core::io::{Io,
-    FramedWrite
 };
 use tokio_core::net::{TcpListener};
 use tokio_core::reactor::{Core, Handle};
@@ -71,7 +70,7 @@ impl TctServer {
 
             // reader   -> sender
             // receiver -> writer
-            let (reader, mut writer) = TctClient::new(stream, addr)
+            let (mut writer, reader) = TctClient::new(stream, addr)
                 .framed(DataParser).split();
             let (sender, receiver) = mpsc::unbounded();
 
@@ -81,28 +80,28 @@ impl TctServer {
 
             // Every message received over the stream, from client
             let reader = reader.for_each(move |msg: Data| {
-                println!("Reading message {}", msg.id().unwrap());
-                // let clients = clients_inner.clone()?
+                println!("Read made for {}", addr);
                 if let Some(id) = msg.id() {
-                    println!("Sending message {}", msg.id().unwrap());
                     clients_inner.borrow_mut().get_mut(&id)
                         .unwrap_or(&mut server_sender)
                         .send(msg)
                         .or_else(
-                            |err| Err(IoError::new(ErrorKind::Other, err)));
-                    Ok(())
+                            |err| Err(IoError::new(ErrorKind::Other, err)))
+                    //Ok(())
                 } else {
                     panic!("Client reported error")
                 }
             }).map_err(|_| ());
 
             let receiver = receiver.for_each(move |mut msg| {
-                println!("Writing message");
-                match writer.start_send(msg) { // handle it like 'send'
+                println!("Writing message to {}", addr);
+                let response = match writer.start_send(msg) { // handle it like 'send'
                     Ok(AsyncSink::Ready) => Ok(()),
                     Ok(AsyncSink::NotReady(balls)) => panic!("failed to send"),
                     Err(err) => Err(())
-                }
+                };
+                writer.poll_complete();
+                response
             });
 
             //let clients = self.clients.clone();

@@ -50,7 +50,10 @@ impl Codec for DataParser {
     fn decode(&mut self, buf: &mut EasyBuf)
         -> Result<Option<Self::In>, IoError>
     {
+        println!("Decoding");
+        let len = buf.len();
         if let Ok(val) = from_slice(buf.as_ref()) {
+            buf.drain_to(len);
             Ok(Some(val))
         } else {
             Err(IoError::new(ErrorKind::Other, "Decode error".to_string()))
@@ -59,7 +62,9 @@ impl Codec for DataParser {
 
     /// Fills the buffer with the consumed 'Out' message.
     fn encode(&mut self, msg: Self::Out, buf: &mut Vec<u8>) {
+        println!("Encoding buffer");
         if let Ok(mut json) = to_vec(&msg) {
+            println!("Filling buffer");
             buf.append(&mut json);
         }
     }
