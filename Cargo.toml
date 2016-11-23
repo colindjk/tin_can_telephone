@@ -9,7 +9,7 @@ serde_json = "0.8.*"
 serde_xml = "0.8.*"
 serde_derive = "0.8.*"
 
-futures = { git = "https://github.com/alexcrichton/futures-rs" }
+futures = "0.1.4"
 tokio-core = { git = "https://github.com/tokio-rs/tokio-core" }
 
 env_logger = "0.3"

@@ -1,20 +1,24 @@
 // TODO: How to send / receive the things. And format.
 use std::net::SocketAddr;
-use std::io::{Error, Write, Read};
-use std::str::{from_utf8};
-use std::collections::{HashMap};
+use std::io;
+//use std::str::{from_utf8};
+//use std::collections::{HashMap};
 
 //use futures::{Future};
-use futures::stream::Stream;
+//use futures::stream::Stream;
+use futures::future::Future;
 
 use tokio_core::net::{TcpStream};
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::{
+    //Core,
+    Handle
+};
 use tokio_core::io::{ // Organized the imports to give a visual rep
     Io,
-    ReadHalf, WriteHalf,
+    //ReadHalf, WriteHalf,
 };
 
-use data::*;
+//use data;
 
 /// Current implementation of our message interpreter, ideally will be the
 /// XMPP stream.
@@ -23,9 +27,13 @@ use data::*;
 /// if we want to do that.
 pub struct TctClient {
     stream: TcpStream,
+
+    #[allow(dead_code)]
     addr: SocketAddr
 }
 
+/// Implementation for the client
+/// TODO: Handle signals?
 impl TctClient {
     pub fn new(stream: TcpStream, addr: SocketAddr) -> TctClient {
         TctClient {
@@ -33,6 +41,18 @@ impl TctClient {
             addr: addr
         }
     }
+
+    /// To be used for a stand-alone client.
+    #[allow(dead_code)]
+    pub fn new_client(addr: &SocketAddr, core_handle: &Handle)
+        -> Result<TctClient, io::Error>
+    {
+        Ok( TctClient {
+            stream: TcpStream::connect(addr, core_handle).wait()?, // wait?
+            addr: addr.clone()
+        })
+    }
+
 }
 
 /// Trait to be used by the server to consume and use the reading / writing of
@@ -41,17 +61,17 @@ impl Io for TctClient {
 
 }
 
-impl Write for TctClient {
-    fn write(&mut self, buf : &[u8]) -> Result<usize, Error> {
+impl io::Write for TctClient {
+    fn write(&mut self, buf : &[u8]) -> Result<usize, io::Error> {
         self.stream.write(buf)
     }
-    fn flush(&mut self) -> Result<(), Error> {
+    fn flush(&mut self) -> Result<(), io::Error> {
         self.stream.flush()
     }
 }
 
-impl Read for TctClient {
-    fn read(&mut self, buf : &mut [u8]) -> Result<usize, Error> {
+impl io::Read for TctClient {
+    fn read(&mut self, buf : &mut [u8]) -> Result<usize, io::Error> {
         self.stream.read(buf)
     }
 }

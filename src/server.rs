@@ -12,15 +12,17 @@ use std::cell::RefCell;
 use std::io::{Error as IoError, ErrorKind};
 
 use futures::AsyncSink;
-use futures::Future;
-use futures::stream::{Stream};
+use futures::future::{Future};
+//use futures::Stream;
+use futures::stream::Stream;
 use futures::sink::{Sink};
 use futures::sync::*;
 
 use tokio_core::io::{Io,
+    //IoFuture, IoStream
 };
 use tokio_core::net::{TcpListener};
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::{Core};
 // tokio::channel is deprecated
 
 use client::TctClient;
@@ -68,6 +70,7 @@ impl TctServer {
 
             let mut server_sender = sender.clone();
 
+            // (writer, reader) == (sink, stream)
             // reader   -> sender
             // receiver -> writer
             let (mut writer, reader) = TctClient::new(stream, addr)
@@ -87,25 +90,24 @@ impl TctServer {
                         .send(msg)
                         .or_else(
                             |err| Err(IoError::new(ErrorKind::Other, err)))
-                    //Ok(())
+
                 } else {
                     panic!("Client reported error")
                 }
             }).map_err(|_| ());
 
-            let receiver = receiver.for_each(move |mut msg| {
+            let receiver = receiver.for_each(move |msg| {
                 println!("Writing message to {}", addr);
                 let response = match writer.start_send(msg) { // handle it like 'send'
                     Ok(AsyncSink::Ready) => Ok(()),
-                    Ok(AsyncSink::NotReady(balls)) => panic!("failed to send"),
-                    Err(err) => Err(())
+                    Ok(AsyncSink::NotReady(_)) => panic!("failed to send"),
+                    Err(_) => Err(())
                 };
-                writer.poll_complete();
+                writer.poll_complete().unwrap();
                 response
             });
 
             //let clients = self.clients.clone();
-            //let connection = receiver.map(|_| ()).select(reader.map(|_| ()));
             handle.spawn(receiver);
             handle.spawn(reader);
 

@@ -1,4 +1,4 @@
-#![feature(proc_macro, plugin, custom_attribute, custom_derive, plugin, test)]
+#![feature(proc_macro, plugin, custom_attribute, custom_derive, plugin)]
 #![plugin(serde_derive)]
 
 // Imports:
@@ -44,8 +44,6 @@ mod data;
 
 use server::TctServer;
 
-/// -- Global Constants --
-//static DELIMITER : u8 = b'\n' as u8;
 
 // We're gonna read some JSON
 fn main() {
