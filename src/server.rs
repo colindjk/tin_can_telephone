@@ -9,7 +9,7 @@ use std::collections::{HashMap};
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use std::io::{Error as IoError, ErrorKind};
+use std::io;
 
 use futures::AsyncSink;
 use futures::future::{Future};
@@ -26,11 +26,11 @@ use tokio_core::reactor::{Core};
 // tokio::channel is deprecated
 
 use client::TctClient;
-use data::{Data, DataParser, UserID};
+use stanza::{Stanza, StanzaCodec, UserID};
 
 pub struct TctServer {
-    clients: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Data>>>>,
-    channel: (mpsc::UnboundedSender<Data>, mpsc::UnboundedReceiver<Data>),
+    clients: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
+    channel: (mpsc::UnboundedSender<Stanza>, mpsc::UnboundedReceiver<Stanza>),
     core: Core,
     addr: SocketAddr,
 }
@@ -74,7 +74,7 @@ impl TctServer {
             // reader   -> sender
             // receiver -> writer
             let (mut writer, reader) = TctClient::new(stream, addr)
-                .framed(DataParser).split();
+                .framed(StanzaCodec).split();
             let (sender, receiver) = mpsc::unbounded();
 
             clients.borrow_mut().insert(addr.port(), sender);
@@ -82,14 +82,14 @@ impl TctServer {
             let clients_inner = clients.clone();
 
             // Every message received over the stream, from client
-            let reader = reader.for_each(move |msg: Data| {
+            let reader = reader.for_each(move |msg: Stanza| {
                 println!("Read made for {}", addr);
-                if let Some(id) = msg.id() {
-                    clients_inner.borrow_mut().get_mut(&id)
+                if let Some(to) = msg.to() {
+                    clients_inner.borrow_mut().get_mut(&to)
                         .unwrap_or(&mut server_sender)
                         .send(msg)
                         .or_else(
-                            |err| Err(IoError::new(ErrorKind::Other, err)))
+                            |err| Err(io::Error::new(io::ErrorKind::Other, err)))
 
                 } else {
                     panic!("Client reported error")
@@ -108,6 +108,7 @@ impl TctServer {
             });
 
             //let clients = self.clients.clone();
+            // TODO: 'select' combinator
             handle.spawn(receiver);
             handle.spawn(reader);
 

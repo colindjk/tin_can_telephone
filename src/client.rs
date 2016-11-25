@@ -1,24 +1,16 @@
 // TODO: How to send / receive the things. And format.
 use std::net::SocketAddr;
 use std::io;
-//use std::str::{from_utf8};
-//use std::collections::{HashMap};
 
-//use futures::{Future};
-//use futures::stream::Stream;
 use futures::future::Future;
 
 use tokio_core::net::{TcpStream};
-use tokio_core::reactor::{
-    //Core,
-    Handle
-};
+use tokio_core::reactor::{ Core, Handle };
 use tokio_core::io::{ // Organized the imports to give a visual rep
     Io,
-    //ReadHalf, WriteHalf,
 };
 
-//use data;
+use stanza;
 
 /// Current implementation of our message interpreter, ideally will be the
 /// XMPP stream.
@@ -26,10 +18,11 @@ use tokio_core::io::{ // Organized the imports to give a visual rep
 /// allow for multiple simultaneous connections to the same stream, not sure
 /// if we want to do that.
 pub struct TctClient {
+    user: Option<stanza::UserID>, // A connection can be made before a login!
     stream: TcpStream,
 
     #[allow(dead_code)]
-    addr: SocketAddr
+    addr: SocketAddr,
 }
 
 /// Implementation for the client
@@ -38,7 +31,8 @@ impl TctClient {
     pub fn new(stream: TcpStream, addr: SocketAddr) -> TctClient {
         TctClient {
             stream: stream,
-            addr: addr
+            user: None,
+            addr: addr,
         }
     }
 
@@ -49,14 +43,26 @@ impl TctClient {
     {
         Ok( TctClient {
             stream: TcpStream::connect(addr, core_handle).wait()?, // wait?
-            addr: addr.clone()
+            user: None,
+            addr: addr.clone(),
         })
     }
 
+    /// Read a line from std input, used for talking to someone, obviously.
+    pub fn read_line(&self, buf: &mut String) {
+        io::stdin().read_line(buf).unwrap();
+    }
+
+    // Consumes a core to run stand-alone client.
+    //pub fn run(mut self, core: Core) {
+        //let client = 
+
+        //core.run(client);
+    //}
 }
 
 /// Trait to be used by the server to consume and use the reading / writing of
-/// this client via sendable objects (data.rs?).
+/// this client via sendable objects (stanza.rs?).
 impl Io for TctClient {
 
 }
@@ -73,5 +79,15 @@ impl io::Write for TctClient {
 impl io::Read for TctClient {
     fn read(&mut self, buf : &mut [u8]) -> Result<usize, io::Error> {
         self.stream.read(buf)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::TctClient;
+
+    #[test]
+    fn example_client() {
+
     }
 }

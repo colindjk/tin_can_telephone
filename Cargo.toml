@@ -1,7 +1,14 @@
 [package]
 name = "tin_can_telephone"
 version = "0.1.0"
+repository = "https://github.com/colindjk/tin_can_telephone"
+homepage = "https://github.com/colindjk/tin_can_telephone"
 authors = ["kibbles <colindjk@gmail.com>"]
+
+description = """
+A messaging service made by a few bored college students for a school project,
+because coding the whole thing in something like Java is just too damn easy.
+"""
 
 [dependencies]
 serde = "0.8.*"
