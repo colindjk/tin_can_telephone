@@ -2,8 +2,10 @@
 // different pieces of stanza which can be passed via HTTP style Request /
 // Response.
 pub type UserID = u16; // right now we'll just id by port number for ease
+pub type TimeStamp = u64;
 
 use std::io;
+use std::collections::{HashMap};
 
 use tokio_core::io::{
     Codec, EasyBuf
@@ -23,37 +25,50 @@ pub enum Stanza {
         to: UserID,
         from: UserID,
         msg: String
-    },    
-    Request {
-        to: UserID,
-        from: UserID,
-    },  // friend request to user
-    GroupRequest {
-        to: UserID,
-        from: UserID,
-    },    // Group invite request
-    Response {
-        to: UserID,
-        from: UserID,
-    },  // friend request to user
-    GroupResponse {
-        to: UserID,
-        from: UserID,
-    },    // Group invite request
-    UserInfo {
-        to: UserID,
-        from: UserID,
-        first_name: String,
-        last_name: String,
     },
+    GroupMessage { // Regular old message to UserID
+        to: UserID,
+        from: UserID,
+        msg: String
+    },    
+    Request { // Used for requesting data from DB and users.
+        to: UserID,
+        from: UserID,
+        kind: RequestKind,
+    },
+    Response { // Server will modify user data (friends list)
+        to: UserID,
+        from: UserID,
+        kind: ResponseKind, // Accepted or rejected
+    },
+
     LoginCredentials {
         from: UserID,
         password: String,
     },
-    History(Vec<String>),
 
     Error(String),                  // Some sort of error?
-    EOF,
+    EOF, // stream terminated
+}
+
+/// C styled enum (actual numeric datatype) which will determine the kind
+/// of data being requested.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum RequestKind {
+    UserInfo,
+    ChatHistory,
+    GroupHistory,
+
+}
+
+/// Response styled thingy yeah TODO: make a better explanation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ResponseKind {
+    UserInfo(HashMap<String, String>),
+    // pulls messages from db into
+    ChatHistory(HashMap<TimeStamp, (UserID, String)>), 
+    GroupHistory(HashMap<TimeStamp, (UserID, String)>),
+
 }
 
 impl Stanza {
@@ -62,8 +77,9 @@ impl Stanza {
     pub fn to(&self) -> Option<UserID> {
         match *self {
             Stanza::Message{ to, .. }       => Some(to.clone()),
+            Stanza::GroupMessage{ to, .. }  => Some(to.clone()),
             Stanza::Request{ to, .. }       => Some(to.clone()),
-            Stanza::GroupRequest{ to, .. }  => Some(to.clone()),
+            Stanza::Response{ to, .. }      => Some(to.clone()),
             Stanza::Error(_)                => None,
             _                               => panic!("Unimplemented")
         }
@@ -72,12 +88,31 @@ impl Stanza {
     /// Optionally returns the ID the message should be sent to.
     pub fn from(&self) -> Option<UserID> {
         match *self {
-            Stanza::Message{ from, .. }       => Some(from.clone()),
-            Stanza::Request{ from, .. }       => Some(from.clone()),
-            Stanza::GroupRequest{ from, .. }  => Some(from.clone()),
-            Stanza::Error(_)                  => None,
-            _ => panic!("Unimplemented")
+            Stanza::Message{ from, .. }     => Some(from.clone()),
+            Stanza::Request{ from, .. }     => Some(from.clone()),
+            Stanza::Response{ from, .. }    => Some(from.clone()),
+            Stanza::Error(_)                => None,
+            _                               => panic!("Unimplemented")
         }
+    }
+
+    /// Processes a request, panics if given stanza is not in fact a request.
+    pub fn process_request(self) -> Self {
+        if let Stanza::Request{ to, from, kind } = self {
+            unimplemented!()
+        } else { panic!("Error, processesing non-request") }
+    }
+}
+
+impl RequestKind {
+    /// Single method implementation which creates a request item.
+    pub fn respond(self, to: UserID, from: UserID) -> ResponseKind {
+        unimplemented!()
+        //match kind {
+            //RequestKind::UserInfo => ,
+            //RequestKind::ChatHistory => ,
+            //RequestKind::GroupHistory => ,
+        //}
     }
 }
 
