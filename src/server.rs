@@ -82,7 +82,15 @@ impl TctServer {
             let clients_inner = clients.clone();
 
             // Every message received over the stream, from client
-            let reader = reader.for_each(move |msg: Stanza| {
+            let reader = reader.into_future().and_then(
+            |(login_creds, stream)| {
+                if let Stanza::LoginCredentials { from, password } = creds {
+
+                } else {
+                    println!("Invalid login credentials, ending stream.");
+
+                }
+            }).for_each(move |msg: Stanza| {
                 println!("Read made for {}", addr);
                 if let Some(to) = msg.to() {
                     clients_inner.borrow_mut().get_mut(&to)
