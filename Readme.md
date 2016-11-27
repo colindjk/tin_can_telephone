@@ -6,51 +6,36 @@ a stateless back-end web service with the purpose of
 
 First Task: How do you do that?
 
-Well first lets just try to talk...
+Well form a TCP Connection with the messaging service.
 
-Part 1: Talking to my application -> Conduct a conversation via HTTP requests.
+Then use this predefined format for sending messages :
 
-Okay so after searching for a basic outline of a server, I found one in the 
-    actual documentation for RUSTful... :D. I made a copy of one which can
-    be located in "src/example.rs"; if you'll notice I make an interface which
-    reflects the Smash Bros. user interface.
+```json
+    { "<type>" : { ... } }
+```
 
-Before checking that out though, here's some information which I found
-    valuable whilst researching server and router setup.
+Currently supported JSON objects to be read by server :
+```json
 
-So what are all these types?
+    { "message" : { to: "<UserID>", from: "<UserID>", msg: "Hello world" } }
 
-TreeRouter\<MethodRouter\<Variables>> ~= Do\<What\<Where>>
+    { "groupMessage" : { to: "<UserID>", from: "<UserID>", msg: "Hello world" } }
 
-TreeRouter: 
-    Tree shaped router (think -> <i>tree</i>) which selects handlers using
-    paths. Think of the MethodRouter & Variables as keys.
-MethodRouter:
-    Mapping between an http method* and a router 'T', where the router is what
-    stores a **Method** and **Variable**. Also remember, 'method'
-    as in HTTP method, GET, POST, PUT, etc..
-Variables:
-    The path variables! Just the path that will be a part of the 'url' so
-    to speak.
+    { "request" : { to: "<UserID>", from: "<UserID>", kind: RequestKind } }
 
-TreeRouter<MethodRouter<Variables>> Example:
+    { "response" : { to: "<UserID>", from: "<UserID>", kind: ResponseKind } }
 
-~~~rust
-    let mut router = TreeRouter::new();
-    
-    router.insert(Get, "/", index); // where index is the <i>Handler</i>
-    router.insert(Get, "/users", show_peeps);
-    router.insert(Get, "/pr", show_power_ranking);
-    router.insert(Get, "/about", about_yoshi);
+    { "register" : { from: "<UserID>", psw: "password" } }
 
-    router.insert(Get, "/*", show_error); // i.e. unknown path / extension...
-~~~
+    { "loginCredentials" : { from: "<UserID>", psw: "password" } }
 
-Ideally the API will function as any RESTful API should. A client will make
-  method call for a particular path or 'Variable', and receive an HTTP response
-  of some sort.
+    { "error" : "" }
 
-Message streams?
+    { "EOF" }
 
+```
+
+Note: The "error" json object is only used for the server itself, and is what
+      is produced when there was trouble parsing.
 
 
