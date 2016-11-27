@@ -14,7 +14,7 @@ use tokio_core::io::{
 use json::ser::{to_vec};
 use json::de::{from_slice};
 
-use mysql;
+use my;
 
 /// -- Global Constants --
 static DELIMITER : u8 = b'\n' as u8;

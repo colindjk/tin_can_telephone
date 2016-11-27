@@ -8,6 +8,7 @@ authors = ["kibbles <colindjk@gmail.com>"]
 description = """
 A messaging service made by a few bored college students for a school project,
 because coding the whole thing in something like Java is just too damn easy.
+{ git = "https://github.com/tokio-rs/tokio-core" }
 """
 
 [dependencies]
@@ -16,7 +17,7 @@ serde_json = "0.8.*"
 serde_derive = "0.8.*"
 
 futures = "0.1.4"
-tokio-core = { git = "https://github.com/tokio-rs/tokio-core" }
+tokio-core = "0.1.1"
 
 mysql_async = "0.2.*"
 

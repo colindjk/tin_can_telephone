@@ -16,11 +16,12 @@ extern crate env_logger;
 extern crate futures;
 extern crate tokio_core;
 
-extern crate mysql_async as mysql;
+extern crate mysql_async as my;
 
 // TODO: NEXT -> SERIALIZATION ULTIMATUM.
 // TODO: mod server -> Client management, send / receive messages to clients
-// TODO: mod client -> reads data given by a client, who writes back? (format? -> next)
+// TODO: mod client -> reads data given by a client, who writes back?
+//       (format? -> next)
 // TODO: mod xmpp -> formatting -> implement XmlStream struct.
 // TODO: mod server, client? -> Implement logging ('log') for the XML stream.
 

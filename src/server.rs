@@ -12,18 +12,15 @@ use std::cell::RefCell;
 use std::io;
 
 use futures::AsyncSink;
-use futures::future::{Future};
-//use futures::Stream;
-use futures::stream::Stream;
 use futures::sink::{Sink};
 use futures::sync::*;
 
-use tokio_core::io::{Io,
-    //IoFuture, IoStream
-};
+use futures::future::{Future};
+use futures::stream::{Stream};
+
+use tokio_core::io::Io;
 use tokio_core::net::{TcpListener};
 use tokio_core::reactor::{Core};
-// tokio::channel is deprecated
 
 use client::TctClient;
 use stanza::{Stanza, StanzaCodec, UserID};
@@ -66,7 +63,7 @@ impl TctServer {
         // For each incoming client connection at address 'addr'
         let server = socket.incoming().for_each(|(stream, addr)| {
 
-            println!("Connected to client {}", addr);
+            println!("Connected to client : {}", addr);
 
             let mut server_sender = sender.clone();
 
@@ -95,7 +92,8 @@ impl TctServer {
                                 .unwrap_or(&mut server_sender) // TODO: 
                                 .send(msg)
                                 .or_else(
-                                    |err| Err(io::Error::new(io::ErrorKind::Other, err)))
+                                    |err| Err(io::Error::new(
+                                            io::ErrorKind::Other, err)))
 
                         } else { panic!("Client reported error") }
                     })
