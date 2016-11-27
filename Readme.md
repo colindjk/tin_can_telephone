@@ -17,13 +17,13 @@ Then use this predefined format for sending messages :
 Currently supported JSON objects to be read by server :
 ```json
 
-    { "message" : { "to": "<UserID>", "from": "<UserID>", msg: "Hello world" } }
+    { "message" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-    { "groupMessage" : { "to": "<UserID>", "from": "<UserID>", msg: "Hello world" } }
+    { "groupMessage" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-    { "request" : { "to": "<UserID>", "from": "<UserID>", kind: RequestKind } }
+    { "request" : { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
 
-    { "response" : { "to": "<UserID>", "from": "<UserID>", kind: ResponseKind } }
+    { "response" : { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
 
     { "register" : { "from": "<UserID>", "psw": "password" } }
 
@@ -37,5 +37,6 @@ Currently supported JSON objects to be read by server :
 
 Note: The "error" json object is only used for the server itself, and is what
       is produced when there was trouble parsing.
+
 
 
