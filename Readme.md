@@ -11,25 +11,25 @@ Well form a TCP Connection with the messaging service.
 Then use this predefined format for sending messages :
 
 ```json
-    { "<type>" : { ... } }
+    { "<Type>" : { ... } }
 ```
 
 Currently supported JSON objects to be read by server :
 ```json
 
-    { "message" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
+    { "Message" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-    { "groupMessage" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
+    { "GroupMessage" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-    { "request" : { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
+    { "Request" : { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
 
-    { "response" : { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
+    { "Response" : { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
 
-    { "register" : { "from": "<UserID>", "psw": "password" } }
+    { "Register" : { "from": "<UserID>", "psw": "password" } }
 
-    { "loginCredentials" : { "from": "<UserID>", "psw": "password" } }
+    { "LoginCredentials" : { "from": "<UserID>", "psw": "password" } }
 
-    { "error" : "Hello error!" }
+    { "Error" : "Hello error!" }
 
     { "EOF" }
 
