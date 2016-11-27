@@ -5,7 +5,7 @@ use std::io;
 use futures::future::Future;
 
 use tokio_core::net::{TcpStream};
-use tokio_core::reactor::{ Core, Handle };
+use tokio_core::reactor;
 use tokio_core::io::{ // Organized the imports to give a visual rep
     Io,
 };
@@ -38,7 +38,7 @@ impl TctClient {
 
     /// To be used for a stand-alone client.
     #[allow(dead_code)]
-    pub fn new_client(addr: &SocketAddr, core_handle: &Handle)
+    pub fn new_client(addr: &SocketAddr, core_handle: &reactor::Handle)
         -> Result<TctClient, io::Error>
     {
         Ok( TctClient {
@@ -53,12 +53,6 @@ impl TctClient {
         io::stdin().read_line(buf).unwrap();
     }
 
-    // Consumes a core to run stand-alone client.
-    //pub fn run(mut self, core: Core) {
-        //let client = 
-
-        //core.run(client);
-    //}
 }
 
 /// Trait to be used by the server to consume and use the reading / writing of

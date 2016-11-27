@@ -77,32 +77,29 @@ impl TctServer {
                 .framed(StanzaCodec).split();
             let (sender, receiver) = mpsc::unbounded();
 
-            clients.borrow_mut().insert(addr.port(), sender);
-
             let clients_inner = clients.clone();
 
             // Every message received over the stream, from client
-            let reader = reader.into_future().and_then(
-            |(login_creds, stream)| {
-                if let Stanza::LoginCredentials { from, password } = creds {
+            let reader = reader.into_future().map_err(|(err, _)| err).and_then(
+                |(creds, stream)| {
+                    if let Some(Stanza::LoginCredentials{ from }) = creds {
+                        println!("User {} logged in!", from);
+                        clients_inner.borrow_mut().insert(from, sender);
+                    } else { // TODO: Registration
+                        panic!("No login credentials supplied from client")
+                    }
+                    stream.for_each(move |msg: Stanza| {
+                        println!("Read made for"); // TODO: Give addr here
+                        if let Some(to) = msg.to() {
+                            clients_inner.borrow_mut().get_mut(&to)
+                                .unwrap_or(&mut server_sender) // TODO: 
+                                .send(msg)
+                                .or_else(
+                                    |err| Err(io::Error::new(io::ErrorKind::Other, err)))
 
-                } else {
-                    println!("Invalid login credentials, ending stream.");
-
-                }
-            }).for_each(move |msg: Stanza| {
-                println!("Read made for {}", addr);
-                if let Some(to) = msg.to() {
-                    clients_inner.borrow_mut().get_mut(&to)
-                        .unwrap_or(&mut server_sender)
-                        .send(msg)
-                        .or_else(
-                            |err| Err(io::Error::new(io::ErrorKind::Other, err)))
-
-                } else {
-                    panic!("Client reported error")
-                }
-            }).map_err(|_| ());
+                        } else { panic!("Client reported error") }
+                    })
+                }).map_err(|_| ());
 
             let receiver = receiver.for_each(move |msg| {
                 println!("Writing message to {}", addr);

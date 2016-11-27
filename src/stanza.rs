@@ -14,6 +14,8 @@ use tokio_core::io::{
 use json::ser::{to_vec};
 use json::de::{from_slice};
 
+use mysql;
+
 /// -- Global Constants --
 static DELIMITER : u8 = b'\n' as u8;
 
@@ -42,9 +44,12 @@ pub enum Stanza {
         kind: ResponseKind, // Accepted or rejected
     },
 
+    Register {
+        from: UserID,
+        //password: String,
+    },
     LoginCredentials {
         from: UserID,
-        password: String,
     },
 
     Error(String),                  // Some sort of error?
@@ -66,8 +71,8 @@ pub enum RequestKind {
 pub enum ResponseKind {
     UserInfo(HashMap<String, String>),
     // pulls messages from db into
-    ChatHistory(HashMap<TimeStamp, (UserID, String)>), 
-    GroupHistory(HashMap<TimeStamp, (UserID, String)>),
+    ChatHistory(HashMap<TimeStamp, Stanza>), 
+    GroupHistory(HashMap<TimeStamp, Stanza>),
 
 }
 
@@ -97,6 +102,7 @@ impl Stanza {
     }
 
     /// Processes a request, panics if given stanza is not in fact a request.
+    #[allow(unused_variables)]
     pub fn process_request(self) -> Self {
         if let Stanza::Request{ to, from, kind } = self {
             unimplemented!()
@@ -131,7 +137,7 @@ impl Codec for StanzaCodec {
         match buf.as_slice().iter().position(|&b| b == DELIMITER) {
             Some(index) => {
                 println!("Decoding {}", index);
-                let object_buf : EasyBuf = buf.drain_to(index + 1).into();
+                let object_buf = buf.drain_to(index + 1);
                 Ok(Some(from_slice(object_buf.as_slice()).unwrap()))
             }
             None => Ok(None)
@@ -150,10 +156,5 @@ impl Codec for StanzaCodec {
 
     }
 
-//  /// Reads until the end of stream, 
-//  fn decode_eof(&mut self, buf: &mut EasyBuf) -> Result<Self::In, io::Error> {
-//      println!("Stopped reading from client {}", buf.len());
-//      Ok(Stanza::EOF)
-//  }
 }
 

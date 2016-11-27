@@ -5,7 +5,6 @@
 
 // -- Parsing:
 extern crate serde;
-extern crate serde_xml as xml;
 extern crate serde_json as json;
 #[macro_use] 
 extern crate serde_derive;
@@ -16,6 +15,8 @@ extern crate env_logger;
 // -- Network:
 extern crate futures;
 extern crate tokio_core;
+
+extern crate mysql_async as mysql;
 
 // TODO: NEXT -> SERIALIZATION ULTIMATUM.
 // TODO: mod server -> Client management, send / receive messages to clients
@@ -38,4 +39,5 @@ extern crate tokio_core;
 pub mod server;
 pub mod client;
 pub mod stanza;
+pub mod db;
 
