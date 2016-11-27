@@ -13,10 +13,11 @@ because coding the whole thing in something like Java is just too damn easy.
 [dependencies]
 serde = "0.8.*"
 serde_json = "0.8.*"
-serde_xml = "0.8.*"
 serde_derive = "0.8.*"
 
 futures = "0.1.4"
 tokio-core = { git = "https://github.com/tokio-rs/tokio-core" }
+
+mysql_async = "0.2.*"
 
 env_logger = "0.3"
