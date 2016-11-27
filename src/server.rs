@@ -79,7 +79,7 @@ impl TctServer {
             // Every message received over the stream, from client
             let reader = reader.into_future().map_err(|(err, _)| err).and_then(
                 |(creds, stream)| {
-                    if let Some(Stanza::LoginCredentials{ from }) = creds {
+                    if let Some(Stanza::LoginCredentials{ from, psw: _ }) = creds {
                         println!("User {} logged in!", from);
                         clients_inner.borrow_mut().insert(from, sender);
                     } else { // TODO: Registration

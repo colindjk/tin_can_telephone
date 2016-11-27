@@ -46,10 +46,13 @@ pub enum Stanza {
 
     Register {
         from: UserID,
-        //password: String,
+        #[serde(default)]
+        psw: String,
     },
     LoginCredentials {
         from: UserID,
+        #[serde(default)]
+        psw: String,
     },
 
     Error(String),                  // Some sort of error?

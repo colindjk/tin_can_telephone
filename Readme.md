@@ -17,26 +17,46 @@ Then use this predefined format for sending messages :
 Currently supported JSON objects to be read by server :
 ```json
 
-    { "Message" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
+{ "Message" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-    { "GroupMessage" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
+{ "GroupMessage" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-    { "Request" : { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
+{ "Request" : { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
 
-    { "Response" : { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
+{ "Response" : { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
 
-    { "Register" : { "from": "<UserID>", "psw": "password" } }
+{ "Register" : { "from": "<UserID>", "psw": "password" } }
 
-    { "LoginCredentials" : { "from": "<UserID>", "psw": "password" } }
+{ "LoginCredentials" : { "from": "<UserID>", "psw": "password" } }
 
-    { "Error" : "Hello error!" }
+{ "Error" : "Hello error!" }
 
-    { "EOF" }
+{ "EOF" }
 
 ```
 
 Note: The "error" json object is only used for the server itself, and is what
       is produced when there was trouble parsing.
 
+RequestKind : This field evaluates to a string, currently supported requests:
+
+```json
+"UserInfo"
+"ChatHistory"
+"GroupHistory"
+```
+
+ResponseKind : Produces a JSON object with a single field, which
+               is the name of the request.
+
+The value they are set equal to is either an array or a hashmap. Arrays will
+be used for *History, as messages occur in linear time. HashMaps will be used
+for information regarding a particular user / group.
+
+```json
+"UserInfo":[]
+"ChatHistory":[]
+"GroupHistory":[]
+```
 
 
