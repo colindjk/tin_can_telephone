@@ -16,6 +16,7 @@ extern crate env_logger;
 extern crate futures;
 extern crate tokio_core;
 
+#[macro_use] 
 extern crate mysql_async as my;
 
 // TODO: NEXT -> SERIALIZATION ULTIMATUM.

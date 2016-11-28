@@ -1,7 +1,7 @@
 // This file will include the Stanza (struct or enum) which will represent the
 // different pieces of stanza which can be passed via HTTP style Request /
 // Response.
-pub type UserID = u16; // right now we'll just id by port number for ease
+pub type UserID = String; // right now we'll just id by port number for ease
 pub type TimeStamp = u64;
 
 use std::io;
@@ -14,13 +14,19 @@ use tokio_core::io::{
 use json::ser::{to_vec};
 use json::de::{from_slice};
 
-use my;
-
 /// -- Global Constants --
 static DELIMITER : u8 = b'\n' as u8;
 
 /// The immutable struct which is passed between threads etc in order
 /// to send and receive messages.
+/// To match:
+///     Stanza::Message { to, from, msg, } => { },
+///     Stanza::GroupMessage { to, from, msg, members, } => { },
+///     Stanza::Request { to, from, kind, } => { },
+///     Stanza::Response { to, from, kind, } => { },
+///     Stanza::Register { user, psw, } => { },
+///     Stanza::RegisterGroup { group, admin, } => { },
+///     Stanza::LoginCredentials { from, psw, } => { },
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Stanza {
     Message { // Regular old message to UserID
@@ -31,7 +37,9 @@ pub enum Stanza {
     GroupMessage { // Regular old message to UserID
         to: UserID,
         from: UserID,
-        msg: String
+        msg: String,
+        members: Option<Vec<UserID>>, // when a message is sent out to client, include 
+                                      // the dudes.
     },    
     Request { // Used for requesting data from DB and users.
         to: UserID,
@@ -45,14 +53,19 @@ pub enum Stanza {
     },
 
     Register {
-        from: UserID,
+        user: UserID,
         #[serde(default)]
         psw: String,
     },
+    RegisterGroup {
+        group: UserID,
+        admin: UserID, // will be admin
+    },
+
     LoginCredentials {
-        from: UserID,
+        user: UserID,
         #[serde(default)]
-        psw: String,
+        psw: Option<String>,
     },
 
     Error(String),                  // Some sort of error?
@@ -61,11 +74,13 @@ pub enum Stanza {
 
 /// C styled enum (actual numeric datatype) which will determine the kind
 /// of data being requested.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub enum RequestKind {
     UserInfo,
     ChatHistory,
     GroupHistory,
+    GroupInvite, // request to a user to join a group.
+    Friends,
 
 }
 
@@ -73,9 +88,10 @@ pub enum RequestKind {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ResponseKind {
     UserInfo(HashMap<String, String>),
-    // pulls messages from db into
     ChatHistory(HashMap<TimeStamp, Stanza>), 
     GroupHistory(HashMap<TimeStamp, Stanza>),
+    GroupInvite(bool), // Accepted or declined?
+    Friends(Vec<UserID>),
 
 }
 
@@ -84,10 +100,10 @@ impl Stanza {
     /// Optionally returns the ID the message should be sent to.
     pub fn to(&self) -> Option<UserID> {
         match *self {
-            Stanza::Message{ to, .. }       => Some(to.clone()),
-            Stanza::GroupMessage{ to, .. }  => Some(to.clone()),
-            Stanza::Request{ to, .. }       => Some(to.clone()),
-            Stanza::Response{ to, .. }      => Some(to.clone()),
+            Stanza::Message{ ref to, .. }       => Some(to.clone()),
+            Stanza::GroupMessage{ ref to, .. }  => Some(to.clone()),
+            Stanza::Request{ ref to, .. }       => Some(to.clone()),
+            Stanza::Response{ ref to, .. }      => Some(to.clone()),
             Stanza::Error(_)                => None,
             _                               => panic!("Unimplemented")
         }
@@ -96,9 +112,9 @@ impl Stanza {
     /// Optionally returns the ID the message should be sent to.
     pub fn from(&self) -> Option<UserID> {
         match *self {
-            Stanza::Message{ from, .. }     => Some(from.clone()),
-            Stanza::Request{ from, .. }     => Some(from.clone()),
-            Stanza::Response{ from, .. }    => Some(from.clone()),
+            Stanza::Message{ ref from, .. }     => Some(from.clone()),
+            Stanza::Request{ ref from, .. }     => Some(from.clone()),
+            Stanza::Response{ ref from, .. }    => Some(from.clone()),
             Stanza::Error(_)                => None,
             _                               => panic!("Unimplemented")
         }
@@ -113,17 +129,7 @@ impl Stanza {
     }
 }
 
-impl RequestKind {
-    /// Single method implementation which creates a request item.
-    pub fn respond(self, to: UserID, from: UserID) -> ResponseKind {
-        unimplemented!()
-        //match kind {
-            //RequestKind::UserInfo => ,
-            //RequestKind::ChatHistory => ,
-            //RequestKind::GroupHistory => ,
-        //}
-    }
-}
+// impl RequestKind { } ?
 
 pub struct StanzaCodec;
 

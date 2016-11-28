@@ -18,6 +18,7 @@ use stanza;
 /// allow for multiple simultaneous connections to the same stream, not sure
 /// if we want to do that.
 pub struct TctClient {
+    #[allow(dead_code)]
     user: Option<stanza::UserID>, // A connection can be made before a login!
     stream: TcpStream,
 
@@ -41,14 +42,15 @@ impl TctClient {
     pub fn new_client(addr: &SocketAddr, core_handle: &reactor::Handle)
         -> Result<TctClient, io::Error>
     {
+
         Ok( TctClient {
-            stream: TcpStream::connect(addr, core_handle).wait()?, // wait?
+            stream: TcpStream::connect(addr, core_handle).wait().unwrap(), // wait?
             user: None,
             addr: addr.clone(),
         })
     }
 
-    /// Read a line from std input, used for talking to someone, obviously.
+    /// Read a line from std input, used for talking to someone, obviously?
     pub fn read_line(&self, buf: &mut String) {
         io::stdin().read_line(buf).unwrap();
     }
@@ -76,12 +78,3 @@ impl io::Read for TctClient {
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::TctClient;
-
-    #[test]
-    fn example_client() {
-
-    }
-}

@@ -27,6 +27,7 @@ use stanza::{Stanza, StanzaCodec, UserID};
 
 pub struct TctServer {
     clients: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
+    //groups: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
     channel: (mpsc::UnboundedSender<Stanza>, mpsc::UnboundedReceiver<Stanza>),
     core: Core,
     addr: SocketAddr,
@@ -79,11 +80,19 @@ impl TctServer {
             // Every message received over the stream, from client
             let reader = reader.into_future().map_err(|(err, _)| err).and_then(
                 |(creds, stream)| {
-                    if let Some(Stanza::LoginCredentials{ from, psw: _ }) = creds {
-                        println!("User {} logged in!", from);
-                        clients_inner.borrow_mut().insert(from, sender);
-                    } else { // TODO: Registration
-                        panic!("No login credentials supplied from client")
+                    if let Some(Stanza::LoginCredentials{ user, psw: _ }) = creds {
+                        println!("User {} logged in!", user);
+                        clients_inner.borrow_mut().insert(user, sender);
+                        // TODO: System of verification that a user is in the db.
+                    } else if let Some(Stanza::Register{ user, psw: _ }) = creds {
+                        println!("New user {} logged in!", user);
+                        clients_inner.borrow_mut().insert(user, sender);
+                    } else {
+                        println!("No login credentials supplied from client. \
+                                  Closing stream...");
+                        // By not giving resources for sender into HashMap,
+                        // data does not persist for this client, connection
+                        // will then time-out.
                     }
                     stream.for_each(move |msg: Stanza| {
                         println!("Read made for"); // TODO: Give addr here
