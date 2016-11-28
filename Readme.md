@@ -27,7 +27,9 @@ Currently supported JSON objects to be read by server :
 
 { "Register" : { "from": "<UserID>", "psw": "password" } }
 
-{ "LoginCredentials" : { "from": "<UserID>", "psw": "password" } }
+{ "RegisterGroup" : { "group": "<UserID>", "admin": "<UserID>" } }
+
+{ "LoginCredentials" : { "user": "<UserID>", "psw": "password" } }
 
 { "Error" : "Hello error!" }
 
@@ -40,10 +42,12 @@ Note: The "error" json object is only used for the server itself, and is what
 
 RequestKind : This field evaluates to a string, currently supported requests:
 
-```json
-"UserInfo"
-"ChatHistory"
-"GroupHistory"
+```javascript
+"UserInfo"      // get info about a particular user
+"ChatHistory"   // get chat history between a 'to' and 'from'
+"GroupHistory"  // group history for 'to'
+"GroupInvite"   // Invites a 'to'
+"Friends"       // Shows friends
 ```
 
 ResponseKind : Produces a JSON object with a single field, which
@@ -57,6 +61,8 @@ for information regarding a particular user / group.
 "UserInfo":[]
 "ChatHistory":[]
 "GroupHistory":[]
+"GroupInvite":int // Accepted or declined? true or false / 1 or 0.
+"Friends":[]
 ```
 
 
