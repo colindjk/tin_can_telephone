@@ -10,7 +10,7 @@ BUFFER_SIZE = 1024
 
 user = "colin"
 
-login_creds = '{"LoginCredentials":{"user":"' + user + '"}\n}'
+login_creds = '{"LoginCredentials":{"user":"' + user + '"}}\n'
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((TCP_IP, TCP_PORT))
@@ -19,13 +19,11 @@ s.send(login_creds)
 user_to = "someone"
 
 for line in fileinput.input():
+    # Insert code to handle switching users that we're talking to
     line = line.strip()
     line = line.decode('utf-8', 'ignore').encode('utf-8')
 
-    # Insert code to handle switching users that we're talking to
-
-    message =
-    '{"Message":{"to":"' + someone + '","from":"' + colin + '","msg":"' + line + '"}}\n'
+    message = '"Message"{"to":"' + user_to + '","from":"' + user + '","msg":"' + line + '"}\n'
 
     s.send(message)
 
