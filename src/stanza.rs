@@ -157,7 +157,9 @@ impl Codec for StanzaCodec {
     fn encode(&mut self, msg: Self::Out, buf: &mut Vec<u8>) -> io::Result<()> {
         println!("Encoding buffer");
         if let Ok(mut json) = to_vec(&msg) {
-            buf.append(&mut json); Ok(())
+            buf.append(&mut json);
+            buf.push(DELIMITER.clone());
+            Ok(())
         } else {
             Err(io::Error::new(
                 io::ErrorKind::Other, "Failed to encode object".to_string()))
