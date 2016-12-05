@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import socket
 import fileinput
 import thread
@@ -20,8 +21,9 @@ def receive():
         #print (received)
         #print("received")
         decode = json.loads(received)
-        print ("received message: " + (decode['Message'])['msg'])
-        print ("give me your message: \n")
+        print ("\n" + (decode['Message'])['from'] + " : " + (decode['Message'])['msg'])
+        sys.stdout.write (user + " : ")
+        sys.stdout.flush()
 
 def login():
     global user
@@ -44,17 +46,15 @@ s.connect((TCP_IP, TCP_PORT))
 login()
 thread.start_new_thread(receive, ())
 while True:
-    line = raw_input ("give me your message: \n")
+    line = raw_input (user + " : ")
     #print ("original line" + line)
     # Insert code to handle switching users that we're talking to
     if line == '!switch':
         switch()
     else:
         line = line.strip()
-        #print ("line striped" + line)
         line = line.decode('utf-8', 'ignore').encode('utf-8')
         message = '"Message"{"to":"' + user_to + '","from":"' + user + '","msg":"' + line + '"}\n'
-        #print ("message sent" + message)
         s.send(message)
 
 
