@@ -17,19 +17,19 @@ Then use this predefined format for sending messages :
 Currently supported JSON objects to be read by server :
 ```json
 
-{ "Message" { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
+{ "Message" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-{ "GroupMessage" { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
+{ "GroupMessage" : { "to": "<UserID>", "from": "<UserID>", "msg": "Hello world" } }
 
-{ "Request" { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
+{ "Request" : { "to": "<UserID>", "from": "<UserID>", "kind": "<RequestKind>" } }
 
-{ "Response" { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
+{ "Response" : { "to": "<UserID>", "from": "<UserID>", "kind": "<ResponseKind>" } }
 
-{ "Register" { "from": "<UserID>", "psw": "password" } }
+{ "Register" : { "user": "<UserID>", "psw": "password" } }
 
-{ "RegisterGroup" { "group": "<UserID>", "admin": "<UserID>" } }
+{ "RegisterGroup" : { "group": "<UserID>", "admin": "<UserID>" } }
 
-{ "LoginCredentials" { "user": "<UserID>", "psw": "password" } }
+{ "LoginCredentials" : { "user": "<UserID>", "psw": "password" } }
 
 { "Error" : "Hello error!" }
 
