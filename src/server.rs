@@ -83,9 +83,14 @@ impl TctServer {
             let reader = reader.into_future().map_err(|(err, _)| err).and_then(
                 |(creds, stream)| {
                     if let Some(Stanza::LoginCredentials{ user, psw: _ }) = creds {
-                        println!("User {} logged in!", user);
-                        clients_inner.borrow_mut().insert(user, sender);
-                        // TODO: System of verification that a user is in the db.
+                        if user.len() == 0 {
+                            println!("No username supplied. \
+                                      Closing stream...");
+                        } else {
+                            println!("User {} logged in!", user);
+                            clients_inner.borrow_mut().insert(user, sender);
+                            // TODO: System of verification that a user is in the db.
+                        }
                     } else if let Some(Stanza::Register{ user, psw: _ }) = creds {
                         println!("New user {} logged in!", user);
                         clients_inner.borrow_mut().insert(user, sender);
