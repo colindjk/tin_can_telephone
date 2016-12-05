@@ -22,7 +22,7 @@ def receive():
         #print("received")
         decode = json.loads(received)
         print ("\n" + (decode['Message'])['from'] + " : " + (decode['Message'])['msg'])
-        sys.stdout.write (user + " : ")
+        sys.stdout.write (user + " > ")
         sys.stdout.flush()
 
 def login():
@@ -46,7 +46,7 @@ s.connect((TCP_IP, TCP_PORT))
 login()
 thread.start_new_thread(receive, ())
 while True:
-    line = raw_input (user + " : ")
+    line = raw_input (user + " > ")
     #print ("original line" + line)
     # Insert code to handle switching users that we're talking to
     if line == '!switch':
