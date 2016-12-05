@@ -38,7 +38,7 @@ pub enum Stanza {
         to: UserID,
         from: UserID,
         msg: String,
-        members: Option<Vec<UserID>>, // when a message is sent out to client, include 
+        members: Option<Vec<UserID>>, // when a message is sent out to client, include
                                       // the dudes.
     },    
     Request { // Used for requesting data from DB and users.
@@ -127,6 +127,31 @@ impl Stanza {
             unimplemented!()
         } else { panic!("Error, processesing non-request") }
     }
+
+    /// Where 'to' is the id of another user.
+    pub fn message(to: UserID, from: UserID, msg: String) -> Stanza {
+        Stanza::Message {
+            to: to,
+            from: None
+            msg: msg
+        }
+    }
+
+    /// Where 'to' is a group field.
+    pub fn group_message(to: UserID, from: UserID, msg: String) -> Stanza {
+        Stanza::GroupMessage {
+            to: to,
+            from: None,
+            msg: msg,
+            members: None
+        }
+    }
+
+    /// Okay forget this... ClientInterface struct?
+    pub fn login(from: UserID, psw: String) -> Stanza {
+
+    }
+
 }
 
 // impl RequestKind { } ?

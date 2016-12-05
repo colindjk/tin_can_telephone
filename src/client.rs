@@ -37,14 +37,14 @@ impl TctClient {
         }
     }
 
-    /// To be used for a stand-alone client.
+    /// TODO: Fix this to return a future which evaluates to a client.
     #[allow(dead_code)]
     pub fn new_client(addr: &SocketAddr, core_handle: &reactor::Handle)
         -> Result<TctClient, io::Error>
     {
 
         Ok( TctClient {
-            stream: TcpStream::connect(addr, core_handle).wait().unwrap(), // wait?
+            stream: TcpStream::connect(addr, core_handle).wait().unwrap(),
             user: None,
             addr: addr.clone(),
         })

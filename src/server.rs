@@ -27,6 +27,7 @@ use stanza::{Stanza, StanzaCodec, UserID};
 
 pub struct TctServer {
     clients: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
+    groups: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
     //groups: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
     channel: (mpsc::UnboundedSender<Stanza>, mpsc::UnboundedReceiver<Stanza>),
     core: Core,
