@@ -27,8 +27,8 @@ use stanza::{Stanza, StanzaCodec, UserID};
 
 pub struct TctServer {
     clients: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
+    #[allow(dead_code)]
     groups: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
-    //groups: Rc<RefCell<HashMap<UserID, mpsc::UnboundedSender<Stanza>>>>,
     channel: (mpsc::UnboundedSender<Stanza>, mpsc::UnboundedReceiver<Stanza>),
     core: Core,
     addr: SocketAddr,
@@ -47,6 +47,7 @@ impl TctServer {
             channel: mpsc::unbounded(),
             core: core,
             addr: addr,
+            groups: Rc::new(RefCell::new(HashMap::new())),
             clients: Rc::new(RefCell::new(HashMap::new()))
         }
     }

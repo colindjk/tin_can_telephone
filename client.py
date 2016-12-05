@@ -39,7 +39,7 @@ def login():
 def switch():
     global user_to
     user_to = raw_input ("enter destination name: ")
-    print ("destination name is:" + user_to)
+    print ("destination name is: " + user_to)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((TCP_IP, TCP_PORT))

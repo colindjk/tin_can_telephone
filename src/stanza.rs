@@ -128,29 +128,29 @@ impl Stanza {
         } else { panic!("Error, processesing non-request") }
     }
 
-    /// Where 'to' is the id of another user.
-    pub fn message(to: UserID, from: UserID, msg: String) -> Stanza {
-        Stanza::Message {
-            to: to,
-            from: None
-            msg: msg
-        }
-    }
+    ///// Where 'to' is the id of another user.
+    //pub fn message(to: UserID, from: UserID, msg: String) -> Stanza {
+        //Stanza::Message {
+            //to: to,
+            //from: None
+            //msg: msg
+        //}
+    //}
 
-    /// Where 'to' is a group field.
-    pub fn group_message(to: UserID, from: UserID, msg: String) -> Stanza {
-        Stanza::GroupMessage {
-            to: to,
-            from: None,
-            msg: msg,
-            members: None
-        }
-    }
+    ///// Where 'to' is a group field.
+    //pub fn group_message(to: UserID, from: UserID, msg: String) -> Stanza {
+        //Stanza::GroupMessage {
+            //to: to,
+            //from: None,
+            //msg: msg,
+            //members: None
+        //}
+    //}
 
-    /// Okay forget this... ClientInterface struct?
-    pub fn login(from: UserID, psw: String) -> Stanza {
+    ///// Okay forget this... ClientInterface struct?
+    //pub fn login(from: UserID, psw: String) -> Stanza {
 
-    }
+    //}
 
 }
 
