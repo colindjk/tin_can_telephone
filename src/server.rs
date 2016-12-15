@@ -13,7 +13,7 @@ use std::io;
 
 use futures::AsyncSink;
 use futures::sink::{Sink};
-use futures::sync::*;
+use futures::sync::mpsc;
 
 use futures::future::{Future};
 use futures::stream::{Stream};
